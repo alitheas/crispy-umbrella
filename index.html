@@ -1,158 +1,368 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-AU">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>My Budget App</title>
+<title>Rates and levies — 2026-27 ACT Budget household scenarios</title>
 
-<!-- Pinned versions on purpose. An unpinned CDN library shipped a breaking
-     change once and silently broke the live Budget Buddy site. Always pin. -->
-<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js" crossorigin></script>
-
-<!-- YOUR DATA GOES IN data.js, NOT IN THIS FILE.
-     It's a plain script tag, not fetch(), so this page works both when you
-     double-click it locally AND when it's live on GitHub Pages. -->
-<script src="data.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
   :root{
-    --surface:#fcfcfb; --card:#fff; --line:#e6e2da;
-    --ink:#2b2420; --ink-2:#5c5249; --ink-3:#857a6e;
-    --accent-a:#b85042;   /* validated pair: use for one series */
-    --accent-b:#0f7ba8;   /* validated pair: use for the other  */
+    --paper:#EEF0F3;
+    --surface:#FFFFFF;
+    --ink:#1B2430;
+    --muted:#5C6673;
+    --rule:#D6DBE1;
+    --fall:#17636B;
+    --rise:#9C4A1A;
+    --serif:"Newsreader",Georgia,serif;
+    --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
   }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--surface);color:var(--ink);
-    font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
-  .wrap{max-width:860px;margin:0 auto;padding:28px 20px 80px}
-  h1{font-size:26px;line-height:1.2;margin:0 0 6px;letter-spacing:-.01em}
-  .sub{color:var(--ink-2);margin:0 0 26px;font-size:15px}
-  h2{font-size:13px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-3);
-    margin:34px 0 12px;font-weight:600}
-  .grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
-  button.card{text-align:left;font:inherit;color:inherit;cursor:pointer}
-  button.card:focus-visible{outline:3px solid var(--accent-b);outline-offset:2px}
-  button.card[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
-  .lab{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3)}
-  .val{font-size:27px;font-weight:600;letter-spacing:-.02em;margin-top:4px;
-    font-variant-numeric:tabular-nums}
-  /* Bars: .track and .bar MUST be display:block. They are spans in a lot of
-     generated code, and inline elements ignore width and height. */
-  .track{display:block;flex:1;height:16px;background:#f2efe9;border-radius:0 4px 4px 0}
-  .bar{display:block;height:16px;border-radius:0 4px 4px 0}
-  table{width:100%;border-collapse:collapse;font-size:14px;background:var(--card);
-    border:1px solid var(--line);border-radius:10px;overflow:hidden}
-  th,td{padding:9px 12px;text-align:right;border-bottom:1px solid var(--line)}
-  th:first-child,td:first-child{text-align:left}
-  thead th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;
-    color:var(--ink-3);background:#faf9f6}
-  td{font-variant-numeric:tabular-nums}
-  footer{margin-top:38px;padding-top:18px;border-top:1px solid var(--line);
-    font-size:13px;color:var(--ink-3)}
-  a{color:var(--accent-b)}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:16px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    font-variant-numeric:tabular-nums;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:40px 24px 72px}
+  @media(max-width:620px){.wrap{padding:28px 18px 56px}}
+
+  .masthead{border-bottom:1px solid var(--rule);padding-bottom:26px;margin-bottom:34px}
+  h1{
+    font-family:var(--serif);
+    font-weight:400;
+    font-size:clamp(30px,5.2vw,46px);
+    line-height:1.12;
+    letter-spacing:-.012em;
+    margin:0 0 14px;
+    max-width:19ch;
+  }
+  .standfirst{margin:0;max-width:66ch;color:var(--muted);font-size:16.5px;line-height:1.62}
+
+  h2{
+    font-family:var(--serif);
+    font-weight:400;
+    font-size:22px;
+    letter-spacing:-.006em;
+    margin:0 0 6px;
+  }
+  .section{margin-top:46px}
+  .section-note{margin:0 0 20px;color:var(--muted);font-size:14.5px;max-width:64ch;line-height:1.6}
+
+  /* ---- spread axis ---- */
+  .plot{
+    background:var(--surface);
+    border:1px solid var(--rule);
+    padding:30px 26px 14px;
+    margin-bottom:8px;
+  }
+  .axis{position:relative;height:132px}
+  .zero{
+    position:absolute;top:0;bottom:26px;width:1px;background:var(--ink);opacity:.5;
+  }
+  .zero-tag{
+    position:absolute;bottom:4px;transform:translateX(-50%);
+    font-size:12px;color:var(--muted);white-space:nowrap;
+  }
+  .baseline{position:absolute;left:0;right:0;bottom:26px;height:1px;background:var(--rule)}
+  .mark{
+    position:absolute;bottom:26px;
+    transform:translateX(-50%);
+    background:none;border:0;padding:0;cursor:pointer;
+    font-family:inherit;font-size:12.5px;color:var(--muted);
+    display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+    height:106px;
+  }
+  .mark:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+  .mark .pct{font-weight:600;font-size:13px;margin-bottom:5px;white-space:nowrap}
+  .mark .stem{width:2px;background:currentColor;opacity:.5;transition:height .5s cubic-bezier(.2,.7,.3,1)}
+  .mark .dot{width:11px;height:11px;border-radius:50%;background:currentColor;margin-top:-1px}
+  .mark[data-dir="fall"]{color:var(--fall)}
+  .mark[data-dir="rise"]{color:var(--rise)}
+  .mark[aria-pressed="true"] .dot{box-shadow:0 0 0 4px var(--surface),0 0 0 6px currentColor}
+  .mark[aria-pressed="false"]{opacity:.42}
+  .mark:hover{opacity:1}
+  .mark .who{
+    position:absolute;bottom:-24px;transform:translateX(-50%);left:50%;
+    font-size:12.5px;color:var(--muted);white-space:nowrap;
+  }
+  @media(prefers-reduced-motion:reduce){.mark .stem{transition:none}}
+
+  .scale-ends{display:flex;justify-content:space-between;color:var(--muted);font-size:12.5px;padding-top:22px}
+
+  /* ---- picker ---- */
+  .picker{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--rule);border-bottom:0;background:var(--surface)}
+  @media(max-width:620px){.picker{grid-template-columns:1fr}}
+  .opt{
+    border:0;border-bottom:1px solid var(--rule);border-right:1px solid var(--rule);
+    background:var(--surface);text-align:left;padding:13px 15px;cursor:pointer;
+    font-family:inherit;font-size:14.5px;color:var(--ink);
+  }
+  .opt:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
+  .opt[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+  .opt .amt{display:block;font-size:13px;opacity:.72;margin-top:2px;font-variant-numeric:tabular-nums}
+
+  /* ---- detail ---- */
+  .detail{background:var(--surface);border:1px solid var(--rule);padding:28px 26px}
+  .who-line{font-family:var(--serif);font-size:20px;line-height:1.35;margin:0 0 4px;max-width:52ch}
+  .who-sub{margin:0 0 26px;color:var(--muted);font-size:14.5px}
+  .figs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px}
+  @media(max-width:620px){.figs{grid-template-columns:1fr;gap:20px}}
+  .fig .lab{font-size:13.5px;color:var(--muted);margin-bottom:3px}
+  .fig .val{font-size:29px;font-weight:500;letter-spacing:-.015em;line-height:1.15}
+  .fig.delta[data-dir="fall"] .val{color:var(--fall)}
+  .fig.delta[data-dir="rise"] .val{color:var(--rise)}
+  .fig .pctline{font-size:14px;margin-top:2px}
+  .trace{
+    font-size:11.5px;line-height:1.45;color:var(--muted);
+    margin-top:7px;padding-top:6px;border-top:1px dotted var(--rule);
+    max-width:34ch;
+  }
+  .flagnote{
+    margin-top:24px;padding:13px 15px;border-left:3px solid var(--rise);
+    background:#FBF6F2;font-size:14px;line-height:1.55;color:var(--ink);max-width:70ch;
+  }
+
+  /* ---- excluded ---- */
+  .excl{border:1px solid var(--rule);background:transparent}
+  .excl-row{display:flex;gap:16px;padding:13px 16px;border-bottom:1px solid var(--rule);font-size:14.5px}
+  .excl-row:last-child{border-bottom:0}
+  .excl-row .n{font-weight:500;min-width:96px}
+  .excl-row .r{color:var(--muted)}
+  @media(max-width:560px){.excl-row{flex-direction:column;gap:2px}}
+
+  /* ---- provenance ---- */
+  .prov{margin-top:46px;border-top:1px solid var(--rule);padding-top:22px;font-size:13.5px;color:var(--muted);line-height:1.62;max-width:74ch}
+  .prov h3{font-family:var(--sans);font-size:13.5px;font-weight:600;color:var(--ink);margin:0 0 8px}
+  .prov p{margin:0 0 12px}
+  .prov dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:3px 16px}
+  .prov dt{color:var(--ink)}
+  .prov dd{margin:0}
 </style>
 </head>
 <body>
-<div id="root" class="wrap"></div>
+<div id="root"></div>
 
-<script type="text/babel">
-const {useState, useEffect} = React;
+<!-- Data first: plain script tag, no fetch, works from file:// and GitHub Pages -->
+<script src="data.js"></script>
 
-// ─────────────────────────────────────────────────────────────
-// data.js sets window.DATA. Until you make your own, this is an
-// empty array and the page tells you so.
-// ─────────────────────────────────────────────────────────────
-const DATA = (typeof window !== "undefined" && window.DATA) || [];
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js" crossorigin></script>
 
-const money = n => (n < 0 ? "-$" : "$") + Math.abs(Math.round(n)).toLocaleString("en-AU");
+<script type="text/babel" data-presets="react">
+const { useState } = React;
+const D = window.BUDGET_DATA;
+const M = D.meta;
 
-function App() {
-  const [sel, setSel] = useState(() => localStorage.getItem("app.sel") || "");
-  useEffect(() => { localStorage.setItem("app.sel", sel); }, [sel]);
+const money = n => "$" + Math.round(n).toLocaleString("en-AU");
+const signedMoney = n => (n > 0 ? "+" : n < 0 ? "\u2212" : "") + "$" + Math.abs(Math.round(n)).toLocaleString("en-AU");
+const signedPct = n => (n > 0 ? "+" : n < 0 ? "\u2212" : "") + Math.abs(n).toFixed(1) + "%";
+const dirOf = n => (n < 0 ? "fall" : "rise");
 
-  if (!DATA.length) {
-    return (
-      <React.Fragment>
-        <h1>Hello, Budget</h1>
-        <p className="sub">
-          Your template is live. If you can read this on your own GitHub Pages
-          URL, your setup is done and you're ready for the workshop.
-        </p>
-        <div className="card">
-          <div className="lab">Next step</div>
-          <p style={{marginBottom:0}}>
-            Replace <code>data.js</code> with your own extracted data, then
-            build your screens below. See <code>ANNOTATED.md</code> for a
-            walkthrough of this file.
-          </p>
-        </div>
-        <div className="card" style={{marginTop:10, background:"#fdf6ec",
-             borderColor:"#e8d6b8"}}>
-          <div className="lab" style={{color:"#6b4f27"}}>Already uploaded your data?</div>
-          <p style={{marginBottom:0, color:"#6b4f27"}}>
-            Then your browser is showing you a <strong>cached copy</strong> of the
-            old empty <code>data.js</code>. Hard refresh:
-            {" "}<strong>Cmd+Shift+R</strong> on Mac, <strong>Ctrl+Shift+R</strong> on
-            Windows. This catches almost everyone once.
-          </p>
-        </div>
-      </React.Fragment>
-    );
-  }
+// Trace string: points at the exact source row and column behind a figure.
+const trace = (id, year) =>
+  M.source_file + " \u00b7 id " + id + ", " + year + " \u00b7 " + M.rates_column;
 
-  const item = DATA.find(d => String(d.id) === sel) || DATA[0];
+const comparable = D.households.filter(h => h.comparable)
+  .sort((a, b) => a.rates_change_pct - b.rates_change_pct);
+const excluded = D.households.filter(h => !h.comparable);
+
+const DOMAIN = 15; // axis runs -15% to +15%; widest observed is -13.6 / +13.2
+const posOf = pct => ((pct + DOMAIN) / (DOMAIN * 2)) * 100;
+
+function Spread({ selected, onSelect }) {
+  return (
+    <div className="plot">
+      <div className="axis">
+        <div className="baseline" />
+        <div className="zero" style={{ left: posOf(0) + "%" }} />
+        <div className="zero-tag" style={{ left: posOf(0) + "%" }}>no change</div>
+        {comparable.map(h => {
+          const on = h.id === selected;
+          return (
+            <button
+              key={h.id}
+              className="mark"
+              data-dir={dirOf(h.rates_change_pct)}
+              aria-pressed={on}
+              style={{ left: posOf(h.rates_change_pct) + "%" }}
+              onClick={() => onSelect(h.id)}
+              title={h.suburb + " " + signedPct(h.rates_change_pct)}
+            >
+              <span className="pct">{signedPct(h.rates_change_pct)}</span>
+              <span
+                className="stem"
+                style={{ height: 20 + (Math.abs(h.rates_change_pct) / 13.6) * 46 + "px" }}
+              />
+              <span className="dot" />
+              <span className="who">{h.suburb}</span>
+            </button>
+          );
+        })}
+      </div>
+      <div className="scale-ends">
+        <span>bill fell 15%</span>
+        <span>bill rose 15%</span>
+      </div>
+    </div>
+  );
+}
+
+function Detail({ h }) {
+  const rowA = D.rows.find(r => r.id === h.id && r.year === "2025-26");
+  const rowB = D.rows.find(r => r.id === h.id && r.year === "2026-27");
+  const dir = dirOf(h.rates_change);
+  const failed =
+    h.recon_status_2025_26 === "fail" || h.recon_status_2026_27 === "fail";
+  const fail = M.reconciliation.failures.find(f => f.id === h.id);
 
   return (
-    <React.Fragment>
-      {/* ── 1. TITLE ─────────────────────────────────────────── */}
-      <h1>My Budget App</h1>
-      <p className="sub">One sentence: who this is for and what they get in 30 seconds.</p>
+    <div className="detail">
+      <p className="who-line">{h.household}</p>
+      <p className="who-sub">{h.suburb}</p>
 
-      {/* ── 2. PICK ONE ──────────────────────────────────────── */}
-      <h2>1. Pick one</h2>
-      <div className="grid">
-        {DATA.map(d => (
-          <button key={d.id} className="card" aria-pressed={String(d.id) === sel}
-                  onClick={() => setSel(String(d.id))}>
-            <b>{d.name || d.id}</b>
+      <div className="figs">
+        <div className="fig">
+          <div className="lab">2025-26 bill</div>
+          <div className="val">{money(rowA[M.rates_column])}</div>
+          <div className="trace">{trace(h.id, "2025-26")}</div>
+        </div>
+        <div className="fig">
+          <div className="lab">2026-27 bill</div>
+          <div className="val">{money(rowB[M.rates_column])}</div>
+          <div className="trace">{trace(h.id, "2026-27")}</div>
+        </div>
+        <div className="fig delta" data-dir={dir}>
+          <div className="lab">Change</div>
+          <div className="val">{signedMoney(h.rates_change)}</div>
+          <div className="pctline">{signedPct(h.rates_change_pct)} on last year</div>
+          <div className="trace">
+            difference of the two figures at left; not a separate source column
+          </div>
+        </div>
+      </div>
+
+      {failed && fail && (
+        <p className="flagnote">
+          A separate figure in this household&rsquo;s {fail.year} record does not
+          balance. Its published net disposable income of {money(fail.published)} is{" "}
+          {money(Math.abs(fail.difference))} more than its own components add to. The
+          cause cannot be determined from the source file. The two rates figures above
+          are unaffected.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function App() {
+  const [selected, setSelected] = useState(comparable[0].id);
+  const h = comparable.find(x => x.id === selected);
+  const lo = M.comparable_range.min_pct, hi = M.comparable_range.max_pct;
+  const r = M.reconciliation;
+
+  return (
+    <div className="wrap">
+      <header className="masthead">
+        <h1>Six Canberra households, one budget, opposite directions</h1>
+        <p className="standfirst">
+          The 2026-27 ACT Budget publishes worked examples of what a household pays the
+          Territory. For rates and levies, the six comparable examples don&rsquo;t move
+          together: one bill falls {Math.abs(lo).toFixed(1)}% while another rises{" "}
+          {hi.toFixed(1)}%. Pick the example closest to your situation.
+        </p>
+      </header>
+
+      <Spread selected={selected} onSelect={setSelected} />
+
+      <div className="picker" role="group" aria-label="Choose a household">
+        {comparable.map(x => (
+          <button
+            key={x.id}
+            className="opt"
+            aria-pressed={x.id === selected}
+            onClick={() => setSelected(x.id)}
+          >
+            {x.suburb}
+            <span className="amt">
+              {money(x.rates_2026_27)} &nbsp;{signedPct(x.rates_change_pct)}
+            </span>
           </button>
         ))}
       </div>
 
-      {/* ── 3. HEADLINE NUMBERS ──────────────────────────────── */}
-      <h2>2. What it means</h2>
-      <div className="grid">
-        <div className="card">
-          <div className="lab">Your headline number</div>
-          <div className="val">{money(item.value || 0)}</div>
+      <Detail h={h} />
+
+      <section className="section">
+        <h2>Three examples that can&rsquo;t be compared</h2>
+        <p className="section-note">
+          These households move house or buy their first home between the two years, so
+          their bill changes for reasons other than the Budget. They are in the source
+          data but excluded from the comparison above.
+        </p>
+        <div className="excl">
+          {excluded.map(x => (
+            <div className="excl-row" key={x.id}>
+              <span className="n">{x.suburb}</span>
+              <span className="r">{x.not_comparable_reason}</span>
+            </div>
+          ))}
         </div>
-        {/* ADD YOUR OTHER STAT TILES HERE */}
-      </div>
+      </section>
 
-      {/* ── 4. THE DETAIL ────────────────────────────────────── */}
-      {/* ADD YOUR TABLE OR CHART HERE */}
-
-      {/* ── 5. CITATION. Do not delete this. ─────────────────── */}
-      <footer>
+      <footer className="prov">
+        <h3>Where these numbers come from</h3>
         <p>
-          Every figure comes from <strong>[NAME THE EXACT TABLE AND STATEMENT]</strong>,
-          2026-27 ACT Budget. See the{" "}
-          <a href="https://www.treasury.act.gov.au/budget/budget-2026-27/budget-papers-and-statements">
-            official Budget papers</a>.
+          Every figure on this page is read from a single column of{" "}
+          {M.source_file}, published with the 2026-27 ACT Budget. Nothing is estimated,
+          modelled or extrapolated. These are {M.household_count} worked examples, not a
+          survey of Canberra, and the suburb names are labels on those examples rather
+          than a guide to what any particular suburb pays. There is no calculator here
+          because the source contains no property values or rating formulas.
         </p>
         <p>
-          This is an illustrative guide, not financial advice or an eligibility
-          determination. Check <a href="https://www.act.gov.au">act.gov.au</a> for
-          eligibility criteria and exact figures.
+          &ldquo;Rates and levies&rdquo; is the source&rsquo;s bundled{" "}
+          {M.rates_column} figure: general rates together with the Police, Fire and
+          Emergency Services Levy, the Safer Families Levy, and a further component the
+          source header abbreviates without defining. It cannot be broken apart, so it is
+          never described here as rates alone.
         </p>
-        <p>Your selection is saved in this browser only. Nothing is sent anywhere.</p>
+        <dl>
+          <dt>Rows checked</dt>
+          <dd>
+            {r.rows_checked} of {r.rows_checked}, against{" "}
+            {r.identity.replace(/_/g, " ")}
+          </dd>
+          <dt>Result</dt>
+          <dd>
+            {r.rows_passed} balanced exactly; {r.rows_failed} did not, beyond a $
+            {r.tolerance_dollars} tolerance
+          </dd>
+          {r.failures.map(f => (
+            <React.Fragment key={f.id + f.year}>
+              <dt>Exception</dt>
+              <dd>
+                {f.suburb}, {f.year}: published {money(f.published)} against{" "}
+                {money(f.calculated)} from its components. Flagged on screen, not
+                corrected.
+              </dd>
+            </React.Fragment>
+          ))}
+        </dl>
       </footer>
-    </React.Fragment>
+    </div>
   );
 }
+
 ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 </script>
 </body>
