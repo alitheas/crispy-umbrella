@@ -3,367 +3,542 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Rates and levies — 2026-27 ACT Budget household scenarios</title>
+<title>Six Levels Down — 2026-27 ACT Budget household scenarios</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
-  :root{
-    --paper:#EEF0F3;
-    --surface:#FFFFFF;
-    --ink:#1B2430;
-    --muted:#5C6673;
-    --rule:#D6DBE1;
-    --fall:#17636B;
-    --rise:#9C4A1A;
-    --serif:"Newsreader",Georgia,serif;
-    --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{
-    background:var(--paper);
-    color:var(--ink);
-    font-family:var(--sans);
-    font-size:16px;
-    line-height:1.5;
-    -webkit-font-smoothing:antialiased;
-    font-variant-numeric:tabular-nums;
-  }
-  .wrap{max-width:920px;margin:0 auto;padding:40px 24px 72px}
-  @media(max-width:620px){.wrap{padding:28px 18px 56px}}
+:root{
+  --void:#070B14;
+  --mist:#8A9BB8;
+  --pale:#DDE6F5;
+  --gold:#E8C87E;
+  --fall:#4FD1C5;
+  --rise:#F0885A;
+  --display:"Cormorant Garamond",Georgia,serif;
+  --sans:"IBM Plex Sans",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:var(--void);
+  color:var(--pale);
+  font-family:var(--sans);
+  font-variant-numeric:tabular-nums;
+  overflow-x:hidden;
+  cursor:crosshair;
+}
+#trail{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden}
+.particle{
+  position:absolute;
+  will-change:transform,opacity;
+  animation:drift 1500ms cubic-bezier(.15,.6,.4,1) forwards;
+  text-shadow:0 0 12px currentColor;
+}
+@keyframes drift{
+  0%{opacity:.95;transform:translate(0,0) rotate(0deg) scale(1)}
+  100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(.35)}
+}
 
-  .masthead{border-bottom:1px solid var(--rule);padding-bottom:26px;margin-bottom:34px}
-  h1{
-    font-family:var(--serif);
-    font-weight:400;
-    font-size:clamp(30px,5.2vw,46px);
-    line-height:1.12;
-    letter-spacing:-.012em;
-    margin:0 0 14px;
-    max-width:19ch;
-  }
-  .standfirst{margin:0;max-width:66ch;color:var(--muted);font-size:16.5px;line-height:1.62}
+.substrate{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.grid-plane{
+  position:absolute;left:50%;top:50%;
+  width:190vmax;height:190vmax;
+  margin:-95vmax 0 0 -95vmax;
+  background-image:
+    linear-gradient(rgba(138,155,184,.09) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(138,155,184,.09) 1px,transparent 1px);
+  background-size:64px 64px;
+  transform-origin:center;
+  animation:fold var(--spin,150s) linear infinite;
+}
+@keyframes fold{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.halo{
+  position:absolute;left:50%;top:50%;
+  width:80vmax;height:80vmax;margin:-40vmax 0 0 -40vmax;
+  background:radial-gradient(circle,rgba(232,200,126,.10),transparent 62%);
+}
+.vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 35%,var(--void) 92%)}
 
-  h2{
-    font-family:var(--serif);
-    font-weight:400;
-    font-size:22px;
-    letter-spacing:-.006em;
-    margin:0 0 6px;
-  }
-  .section{margin-top:46px}
-  .section-note{margin:0 0 20px;color:var(--muted);font-size:14.5px;max-width:64ch;line-height:1.6}
+.frames{position:fixed;inset:0;z-index:1;pointer-events:none;display:grid;place-items:center}
+.frame{
+  position:absolute;
+  border:1px solid rgba(232,200,126,.16);
+  transition:transform 1500ms cubic-bezier(.2,.8,.2,1),opacity 1200ms ease;
+}
 
-  /* ---- spread axis ---- */
-  .plot{
-    background:var(--surface);
-    border:1px solid var(--rule);
-    padding:30px 26px 14px;
-    margin-bottom:8px;
-  }
-  .axis{position:relative;height:132px}
-  .zero{
-    position:absolute;top:0;bottom:26px;width:1px;background:var(--ink);opacity:.5;
-  }
-  .zero-tag{
-    position:absolute;bottom:4px;transform:translateX(-50%);
-    font-size:12px;color:var(--muted);white-space:nowrap;
-  }
-  .baseline{position:absolute;left:0;right:0;bottom:26px;height:1px;background:var(--rule)}
-  .mark{
-    position:absolute;bottom:26px;
-    transform:translateX(-50%);
-    background:none;border:0;padding:0;cursor:pointer;
-    font-family:inherit;font-size:12.5px;color:var(--muted);
-    display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
-    height:106px;
-  }
-  .mark:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
-  .mark .pct{font-weight:600;font-size:13px;margin-bottom:5px;white-space:nowrap}
-  .mark .stem{width:2px;background:currentColor;opacity:.5;transition:height .5s cubic-bezier(.2,.7,.3,1)}
-  .mark .dot{width:11px;height:11px;border-radius:50%;background:currentColor;margin-top:-1px}
-  .mark[data-dir="fall"]{color:var(--fall)}
-  .mark[data-dir="rise"]{color:var(--rise)}
-  .mark[aria-pressed="true"] .dot{box-shadow:0 0 0 4px var(--surface),0 0 0 6px currentColor}
-  .mark[aria-pressed="false"]{opacity:.42}
-  .mark:hover{opacity:1}
-  .mark .who{
-    position:absolute;bottom:-24px;transform:translateX(-50%);left:50%;
-    font-size:12.5px;color:var(--muted);white-space:nowrap;
-  }
-  @media(prefers-reduced-motion:reduce){.mark .stem{transition:none}}
+.stage{position:relative;z-index:2;min-height:100vh;display:grid;place-items:center;padding:44px 22px}
+.panel{width:100%;max-width:760px;text-align:center}
 
-  .scale-ends{display:flex;justify-content:space-between;color:var(--muted);font-size:12.5px;padding-top:22px}
+.totem{width:96px;height:96px;margin:0 auto 30px}
+.totem svg{width:100%;height:100%;animation:wobble 2.6s ease-in-out infinite;transform-origin:50% 88%}
+@keyframes wobble{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
 
-  /* ---- picker ---- */
-  .picker{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--rule);border-bottom:0;background:var(--surface)}
-  @media(max-width:620px){.picker{grid-template-columns:1fr}}
-  .opt{
-    border:0;border-bottom:1px solid var(--rule);border-right:1px solid var(--rule);
-    background:var(--surface);text-align:left;padding:13px 15px;cursor:pointer;
-    font-family:inherit;font-size:14.5px;color:var(--ink);
-  }
-  .opt:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
-  .opt[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
-  .opt .amt{display:block;font-size:13px;opacity:.72;margin-top:2px;font-variant-numeric:tabular-nums}
+.kicker{font-size:11.5px;letter-spacing:.34em;color:var(--gold);margin-bottom:20px;opacity:.85}
+h1{
+  font-family:var(--display);font-weight:300;
+  font-size:clamp(36px,7.4vw,70px);line-height:1.04;
+  letter-spacing:-.015em;margin:0 0 22px;
+}
+.lede{color:var(--mist);max-width:54ch;margin:0 auto 34px;font-size:16.5px;line-height:1.72;font-weight:300}
 
-  /* ---- detail ---- */
-  .detail{background:var(--surface);border:1px solid var(--rule);padding:28px 26px}
-  .who-line{font-family:var(--serif);font-size:20px;line-height:1.35;margin:0 0 4px;max-width:52ch}
-  .who-sub{margin:0 0 26px;color:var(--muted);font-size:14.5px}
-  .figs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px}
-  @media(max-width:620px){.figs{grid-template-columns:1fr;gap:20px}}
-  .fig .lab{font-size:13.5px;color:var(--muted);margin-bottom:3px}
-  .fig .val{font-size:29px;font-weight:500;letter-spacing:-.015em;line-height:1.15}
-  .fig.delta[data-dir="fall"] .val{color:var(--fall)}
-  .fig.delta[data-dir="rise"] .val{color:var(--rise)}
-  .fig .pctline{font-size:14px;margin-top:2px}
-  .trace{
-    font-size:11.5px;line-height:1.45;color:var(--muted);
-    margin-top:7px;padding-top:6px;border-top:1px dotted var(--rule);
-    max-width:34ch;
-  }
-  .flagnote{
-    margin-top:24px;padding:13px 15px;border-left:3px solid var(--rise);
-    background:#FBF6F2;font-size:14px;line-height:1.55;color:var(--ink);max-width:70ch;
-  }
+.btn{
+  font-family:var(--sans);font-size:13px;letter-spacing:.2em;
+  background:transparent;color:var(--gold);
+  border:1px solid rgba(232,200,126,.42);
+  padding:15px 34px;cursor:crosshair;
+  transition:background .4s ease,border-color .4s ease,letter-spacing .4s ease;
+}
+.btn:hover{background:rgba(232,200,126,.09);border-color:var(--gold);letter-spacing:.26em}
+.btn:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
+.btn.ghost{color:var(--mist);border-color:rgba(138,155,184,.3)}
+.btn.ghost:hover{background:rgba(138,155,184,.08);border-color:var(--mist)}
 
-  /* ---- excluded ---- */
-  .excl{border:1px solid var(--rule);background:transparent}
-  .excl-row{display:flex;gap:16px;padding:13px 16px;border-bottom:1px solid var(--rule);font-size:14.5px}
-  .excl-row:last-child{border-bottom:0}
-  .excl-row .n{font-weight:500;min-width:96px}
-  .excl-row .r{color:var(--muted)}
-  @media(max-width:560px){.excl-row{flex-direction:column;gap:2px}}
+.depthbar{display:flex;gap:7px;justify-content:center;margin-bottom:30px}
+.depthdot{width:26px;height:2px;background:rgba(138,155,184,.26)}
+.depthdot.on{background:var(--gold)}
+.depthdot.done{background:rgba(232,200,126,.45)}
 
-  /* ---- provenance ---- */
-  .prov{margin-top:46px;border-top:1px solid var(--rule);padding-top:22px;font-size:13.5px;color:var(--muted);line-height:1.62;max-width:74ch}
-  .prov h3{font-family:var(--sans);font-size:13.5px;font-weight:600;color:var(--ink);margin:0 0 8px}
-  .prov p{margin:0 0 12px}
-  .prov dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:3px 16px}
-  .prov dt{color:var(--ink)}
-  .prov dd{margin:0}
+.dilation{font-size:10.5px;letter-spacing:.28em;color:var(--mist);opacity:.6;margin-bottom:26px}
+
+.persona{
+  font-family:var(--display);font-weight:400;
+  font-size:clamp(21px,3.4vw,30px);line-height:1.34;
+  margin:0 auto 8px;max-width:26ch;
+}
+.place{font-size:12px;letter-spacing:.28em;color:var(--gold);margin-bottom:36px;opacity:.9}
+
+.anchor{margin-bottom:36px}
+.anchor .lab{font-size:12px;letter-spacing:.2em;color:var(--mist);margin-bottom:8px}
+.anchor .amt{font-family:var(--display);font-weight:300;font-size:clamp(46px,9vw,76px);line-height:1;letter-spacing:-.02em}
+.trace{font-size:10.5px;color:var(--mist);opacity:.62;margin-top:12px;letter-spacing:.05em;line-height:1.6}
+
+.ask{font-size:15px;color:var(--pale);margin-bottom:22px;font-weight:300}
+.choices{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.choice{
+  font-family:var(--sans);font-size:13px;letter-spacing:.16em;
+  background:transparent;border:1px solid rgba(138,155,184,.34);
+  color:var(--pale);padding:16px 30px;cursor:crosshair;
+  transition:transform .35s cubic-bezier(.2,.8,.2,1),border-color .35s,background .35s,color .35s;
+}
+.choice:hover{transform:translateY(-3px)}
+.choice.down:hover{border-color:var(--fall);background:rgba(79,209,197,.09);color:var(--fall)}
+.choice.up:hover{border-color:var(--rise);background:rgba(240,136,90,.09);color:var(--rise)}
+.choice:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
+
+.reveal{animation:surface var(--rev,900ms) cubic-bezier(.16,1,.3,1) both}
+@keyframes surface{
+  from{opacity:0;transform:translateY(26px) scale(.965);filter:blur(9px)}
+  to{opacity:1;transform:none;filter:none}
+}
+.verdict{font-size:12px;letter-spacing:.28em;margin-bottom:26px}
+.verdict.right{color:var(--fall)}
+.verdict.wrong{color:var(--rise)}
+
+.pair{display:flex;gap:clamp(22px,6vw,64px);justify-content:center;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap}
+.col .lab{font-size:11px;letter-spacing:.2em;color:var(--mist);margin-bottom:7px}
+.col .v{font-family:var(--display);font-weight:300;font-size:clamp(30px,6vw,50px);line-height:1}
+.col .tr{font-size:10px;color:var(--mist);opacity:.55;margin-top:9px;max-width:23ch;line-height:1.55}
+.col.delta[data-dir="fall"] .v{color:var(--fall)}
+.col.delta[data-dir="rise"] .v{color:var(--rise)}
+.col.delta .pc{font-size:13px;margin-top:5px;opacity:.85}
+
+.flag{
+  margin:30px auto 0;max-width:56ch;padding:15px 19px;
+  border-left:2px solid var(--rise);background:rgba(240,136,90,.07);
+  font-size:13px;line-height:1.65;color:var(--mist);text-align:left;
+}
+
+.horizon{position:relative;height:210px;margin:44px 0 10px;border-bottom:1px solid rgba(138,155,184,.3)}
+.hzero{position:absolute;top:0;bottom:0;width:1px;background:rgba(232,200,126,.45)}
+.hmark{
+  position:absolute;bottom:0;
+  background:none;border:0;padding:0;cursor:crosshair;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+  animation:rise-in 1100ms cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes rise-in{
+  from{opacity:0;transform:translateX(-50%) translateY(34px)}
+  to{opacity:1;transform:translateX(-50%) translateY(0)}
+}
+.hmark .p{font-size:12px;font-weight:500;margin-bottom:7px;white-space:nowrap}
+.hmark .stem{width:1px;background:currentColor;opacity:.5}
+.hmark .dot{width:9px;height:9px;border-radius:50%;background:currentColor;box-shadow:0 0 14px currentColor}
+.hmark .nm{position:absolute;bottom:-25px;font-size:11px;letter-spacing:.13em;color:var(--mist);white-space:nowrap}
+.hmark[data-dir="fall"]{color:var(--fall)}
+.hmark[data-dir="rise"]{color:var(--rise)}
+.hmark:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
+.hends{display:flex;justify-content:space-between;font-size:10.5px;letter-spacing:.18em;color:var(--mist);opacity:.6;margin-top:32px}
+
+.closing{max-width:660px;margin:70px auto 0;text-align:left}
+.closing h2{font-family:var(--display);font-weight:400;font-size:23px;margin:0 0 9px;color:var(--pale)}
+.closing p{color:var(--mist);font-size:13.5px;line-height:1.75;margin:0 0 15px;font-weight:300}
+.exrow{display:flex;gap:15px;padding:11px 0;border-top:1px solid rgba(138,155,184,.16);font-size:13px;color:var(--mist)}
+.exrow .n{color:var(--pale);min-width:92px;letter-spacing:.1em}
+.prov{margin-top:44px;border-top:1px solid rgba(138,155,184,.2);padding-top:22px}
+.prov dl{display:grid;grid-template-columns:auto 1fr;gap:5px 18px;font-size:12.5px;color:var(--mist);line-height:1.65}
+.prov dt{color:var(--gold);opacity:.85}
+.prov dd{margin:0}
+@media(max-width:560px){
+  .prov dl{grid-template-columns:1fr;gap:2px}
+  .prov dt{margin-top:10px}
+  .exrow{flex-direction:column;gap:2px}
+  .horizon{height:180px}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+}
 </style>
 </head>
 <body>
+<div id="trail" aria-hidden="true"></div>
+<div class="substrate" aria-hidden="true">
+  <div class="grid-plane" style="--spin:150s"></div>
+  <div class="grid-plane" style="--spin:230s;opacity:.5"></div>
+  <div class="halo"></div>
+  <div class="vignette"></div>
+</div>
 <div id="root"></div>
 
-<!-- Data first: plain script tag, no fetch, works from file:// and GitHub Pages -->
+<!-- Data first: plain script tag, no fetch. Works from file:// and GitHub Pages. -->
 <script src="data.js"></script>
-
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js" crossorigin></script>
 
+<script>
+/* Cursor trail: stars and music notes. Vanilla and pooled, kept outside React
+   so particle churn never triggers a re-render. */
+(function(){
+  var layer = document.getElementById('trail');
+  var glyphs = ['\u2726','\u2727','\u2734','\u266A','\u266B','\u266C'];
+  var colours = ['#E8C87E','#DDE6F5','#4FD1C5','#F0885A'];
+  var last = 0, live = 0, MAX = 44;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  function spawn(x, y){
+    if (live >= MAX) return;
+    var el = document.createElement('span');
+    el.className = 'particle';
+    el.textContent = glyphs[(Math.random() * glyphs.length) | 0];
+    el.style.color = colours[(Math.random() * colours.length) | 0];
+    el.style.left = (x + (Math.random() * 16 - 8)) + 'px';
+    el.style.top  = (y + (Math.random() * 16 - 8)) + 'px';
+    el.style.setProperty('--dx', (Math.random() * 70 - 35).toFixed(0) + 'px');
+    el.style.setProperty('--dy', (-30 - Math.random() * 62).toFixed(0) + 'px');
+    el.style.setProperty('--rot', (Math.random() * 220 - 110).toFixed(0) + 'deg');
+    el.style.fontSize = (11 + Math.random() * 10).toFixed(0) + 'px';
+    layer.appendChild(el); live++;
+    setTimeout(function(){ el.remove(); live--; }, 1520);
+  }
+  window.addEventListener('pointermove', function(e){
+    var now = performance.now();
+    if (now - last < 34) return;
+    last = now; spawn(e.clientX, e.clientY);
+  }, { passive: true });
+})();
+</script>
+
 <script type="text/babel" data-presets="react">
-const { useState } = React;
+const { useState, useEffect } = React;
 const D = window.BUDGET_DATA;
 const M = D.meta;
+const R = M.reconciliation;
 
 const money = n => "$" + Math.round(n).toLocaleString("en-AU");
 const signedMoney = n => (n > 0 ? "+" : n < 0 ? "\u2212" : "") + "$" + Math.abs(Math.round(n)).toLocaleString("en-AU");
 const signedPct = n => (n > 0 ? "+" : n < 0 ? "\u2212" : "") + Math.abs(n).toFixed(1) + "%";
 const dirOf = n => (n < 0 ? "fall" : "rise");
+const trace = (id, year) => M.source_file + " \u00b7 id " + id + ", " + year + " \u00b7 " + M.rates_column;
 
-// Trace string: points at the exact source row and column behind a figure.
-const trace = (id, year) =>
-  M.source_file + " \u00b7 id " + id + ", " + year + " \u00b7 " + M.rates_column;
+/* Levels ordered by size of the dollar movement, smallest first:
+   the deeper you go, the more is at stake. Stated in the closing notes. */
+const LEVELS = D.households
+  .filter(h => h.comparable)
+  .sort((a, b) => Math.abs(a.rates_change) - Math.abs(b.rates_change));
+const EXCLUDED = D.households.filter(h => !h.comparable);
+const BY_PCT = LEVELS.slice().sort((a, b) => a.rates_change_pct - b.rates_change_pct);
 
-const comparable = D.households.filter(h => h.comparable)
-  .sort((a, b) => a.rates_change_pct - b.rates_change_pct);
-const excluded = D.households.filter(h => !h.comparable);
+const DOMAIN = 15;
+const posOf = p => ((p + DOMAIN) / (DOMAIN * 2)) * 100;
+const dilate = depth => Math.round(760 * Math.pow(1.34, depth));
 
-const DOMAIN = 15; // axis runs -15% to +15%; widest observed is -13.6 / +13.2
-const posOf = pct => ((pct + DOMAIN) / (DOMAIN * 2)) * 100;
-
-function Spread({ selected, onSelect }) {
+function Totem(){
   return (
-    <div className="plot">
-      <div className="axis">
-        <div className="baseline" />
-        <div className="zero" style={{ left: posOf(0) + "%" }} />
-        <div className="zero-tag" style={{ left: posOf(0) + "%" }}>no change</div>
-        {comparable.map(h => {
-          const on = h.id === selected;
-          return (
-            <button
-              key={h.id}
-              className="mark"
-              data-dir={dirOf(h.rates_change_pct)}
-              aria-pressed={on}
-              style={{ left: posOf(h.rates_change_pct) + "%" }}
-              onClick={() => onSelect(h.id)}
-              title={h.suburb + " " + signedPct(h.rates_change_pct)}
-            >
-              <span className="pct">{signedPct(h.rates_change_pct)}</span>
-              <span
-                className="stem"
-                style={{ height: 20 + (Math.abs(h.rates_change_pct) / 13.6) * 46 + "px" }}
-              />
-              <span className="dot" />
-              <span className="who">{h.suburb}</span>
-            </button>
-          );
-        })}
-      </div>
-      <div className="scale-ends">
-        <span>bill fell 15%</span>
-        <span>bill rose 15%</span>
-      </div>
+    <div className="totem">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <polygon points="50,8 74,52 50,72 26,52" fill="none" stroke="#E8C87E" strokeWidth="1.2" opacity=".9"/>
+        <polygon points="50,26 62,52 50,63 38,52" fill="none" stroke="#E8C87E" strokeWidth="1" opacity=".5"/>
+        <line x1="50" y1="72" x2="50" y2="90" stroke="#E8C87E" strokeWidth="1.2"/>
+        <ellipse cx="50" cy="91" rx="9" ry="2.4" fill="none" stroke="#E8C87E" strokeWidth=".8" opacity=".45"/>
+      </svg>
     </div>
   );
 }
 
-function Detail({ h }) {
+function Frames({ depth }){
+  return (
+    <div className="frames" aria-hidden="true">
+      {[0,1,2,3,4,5,6].map(i => {
+        const active = i <= depth;
+        const size = 96 - i * 11;
+        return (
+          <div key={i} className="frame" style={{
+            width: size + "vmin",
+            height: (size * 0.66) + "vmin",
+            transform: "rotate(" + (i * 1.9 - depth * 0.8) + "deg) scale(" + (active ? 1 : 0.9) + ")",
+            opacity: active ? (0.5 - i * 0.055) : 0.05
+          }}/>
+        );
+      })}
+    </div>
+  );
+}
+
+function Opening({ onBegin }){
+  return (
+    <div className="panel">
+      <Totem/>
+      <div className="kicker">SIX LEVELS DOWN</div>
+      <h1>Whose rates bill fell while the city&rsquo;s rose?</h1>
+      <p className="lede">
+        The 2026-27 ACT Budget publishes worked examples of what a Canberra household
+        pays the Territory. Six of them can be fairly compared year to year, and they do
+        not move together. Before each one is revealed, you guess which way it went.
+      </p>
+      <button className="btn" onClick={onBegin}>BEGIN THE DESCENT</button>
+    </div>
+  );
+}
+
+function Level({ h, depth, onAnswer }){
+  const [guess, setGuess] = useState(null);
+  useEffect(() => { setGuess(null); }, [h.id]);
+
   const rowA = D.rows.find(r => r.id === h.id && r.year === "2025-26");
   const rowB = D.rows.find(r => r.id === h.id && r.year === "2026-27");
   const dir = dirOf(h.rates_change);
-  const failed =
-    h.recon_status_2025_26 === "fail" || h.recon_status_2026_27 === "fail";
-  const fail = M.reconciliation.failures.find(f => f.id === h.id);
+  const correct = guess === dir;
+  const fail = R.failures.find(f => f.id === h.id);
+  const ms = dilate(depth);
+  const isLast = depth === LEVELS.length - 1;
 
   return (
-    <div className="detail">
-      <p className="who-line">{h.household}</p>
-      <p className="who-sub">{h.suburb}</p>
-
-      <div className="figs">
-        <div className="fig">
-          <div className="lab">2025-26 bill</div>
-          <div className="val">{money(rowA[M.rates_column])}</div>
-          <div className="trace">{trace(h.id, "2025-26")}</div>
-        </div>
-        <div className="fig">
-          <div className="lab">2026-27 bill</div>
-          <div className="val">{money(rowB[M.rates_column])}</div>
-          <div className="trace">{trace(h.id, "2026-27")}</div>
-        </div>
-        <div className="fig delta" data-dir={dir}>
-          <div className="lab">Change</div>
-          <div className="val">{signedMoney(h.rates_change)}</div>
-          <div className="pctline">{signedPct(h.rates_change_pct)} on last year</div>
-          <div className="trace">
-            difference of the two figures at left; not a separate source column
-          </div>
-        </div>
+    <div className="panel">
+      <div className="depthbar">
+        {LEVELS.map((_, i) => (
+          <span key={i} className={"depthdot " + (i === depth ? "on" : i < depth ? "done" : "")}/>
+        ))}
+      </div>
+      <div className="dilation">
+        LEVEL {depth + 1} &nbsp;&middot;&nbsp; TIME DILATION {(ms / 760).toFixed(1)}&times;
       </div>
 
-      {failed && fail && (
-        <p className="flagnote">
-          A separate figure in this household&rsquo;s {fail.year} record does not
-          balance. Its published net disposable income of {money(fail.published)} is{" "}
-          {money(Math.abs(fail.difference))} more than its own components add to. The
-          cause cannot be determined from the source file. The two rates figures above
-          are unaffected.
-        </p>
+      <p className="persona">{h.household}</p>
+      <div className="place">{h.suburb.toUpperCase()}</div>
+
+      <div className="anchor">
+        <div className="lab">RATES AND LEVIES, 2025-26</div>
+        <div className="amt">{money(rowA[M.rates_column])}</div>
+        <div className="trace">{trace(h.id, "2025-26")}</div>
+      </div>
+
+      {!guess && (
+        <div>
+          <p className="ask">Which way did this bill move in 2026-27?</p>
+          <div className="choices">
+            <button className="choice down" onClick={() => setGuess("fall")}>IT FELL</button>
+            <button className="choice up" onClick={() => setGuess("rise")}>IT ROSE</button>
+          </div>
+        </div>
+      )}
+
+      {guess && (
+        <div className="reveal" style={{ "--rev": ms + "ms" }}>
+          <div className={"verdict " + (correct ? "right" : "wrong")}>
+            {correct ? "YOUR INSTINCT HELD" : "THE LEVEL SHIFTED UNDER YOU"}
+          </div>
+          <div className="pair">
+            <div className="col">
+              <div className="lab">2026-27</div>
+              <div className="v">{money(rowB[M.rates_column])}</div>
+              <div className="tr">{trace(h.id, "2026-27")}</div>
+            </div>
+            <div className="col delta" data-dir={dir}>
+              <div className="lab">CHANGE</div>
+              <div className="v">{signedMoney(h.rates_change)}</div>
+              <div className="pc">{signedPct(h.rates_change_pct)} on last year</div>
+              <div className="tr">difference of the two figures; not a source column</div>
+            </div>
+          </div>
+
+          {fail && (
+            <div className="flag">
+              A different figure in this household&rsquo;s {fail.year} record does not
+              balance. Its published net disposable income of {money(fail.published)} is{" "}
+              {money(Math.abs(fail.difference))} more than its own components add to. The
+              cause cannot be determined from the source file. The two bills above are
+              unaffected.
+            </div>
+          )}
+
+          <div style={{ marginTop: 34 }}>
+            <button className="btn" onClick={() => onAnswer(correct)}>
+              {isLast ? "KICK \u2014 RETURN TO THE SURFACE" : "GO DEEPER"}
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
 }
 
-function App() {
-  const [selected, setSelected] = useState(comparable[0].id);
-  const h = comparable.find(x => x.id === selected);
+function Surface({ score, onAgain }){
+  const [sel, setSel] = useState(null);
   const lo = M.comparable_range.min_pct, hi = M.comparable_range.max_pct;
-  const r = M.reconciliation;
+  const h = sel ? LEVELS.find(x => x.id === sel) : null;
+  const rowA = h && D.rows.find(r => r.id === h.id && r.year === "2025-26");
+  const rowB = h && D.rows.find(r => r.id === h.id && r.year === "2026-27");
 
   return (
-    <div className="wrap">
-      <header className="masthead">
-        <h1>Six Canberra households, one budget, opposite directions</h1>
-        <p className="standfirst">
-          The 2026-27 ACT Budget publishes worked examples of what a household pays the
-          Territory. For rates and levies, the six comparable examples don&rsquo;t move
-          together: one bill falls {Math.abs(lo).toFixed(1)}% while another rises{" "}
-          {hi.toFixed(1)}%. Pick the example closest to your situation.
-        </p>
-      </header>
+    <div className="panel">
+      <Totem/>
+      <div className="kicker">THE SURFACE</div>
+      <h1>{score} of {LEVELS.length} read correctly</h1>
+      <p className="lede">
+        All six at once. One bill fell {Math.abs(lo).toFixed(1)}% while another rose{" "}
+        {hi.toFixed(1)}% &mdash; same budget, same year. Select any point to hold it still.
+      </p>
 
-      <Spread selected={selected} onSelect={setSelected} />
-
-      <div className="picker" role="group" aria-label="Choose a household">
-        {comparable.map(x => (
-          <button
-            key={x.id}
-            className="opt"
-            aria-pressed={x.id === selected}
-            onClick={() => setSelected(x.id)}
-          >
-            {x.suburb}
-            <span className="amt">
-              {money(x.rates_2026_27)} &nbsp;{signedPct(x.rates_change_pct)}
-            </span>
+      <div className="horizon">
+        <div className="hzero" style={{ left: posOf(0) + "%" }}/>
+        {BY_PCT.map((x, i) => (
+          <button key={x.id} className="hmark" data-dir={dirOf(x.rates_change_pct)}
+            style={{ left: posOf(x.rates_change_pct) + "%", animationDelay: (i * 130) + "ms" }}
+            onClick={() => setSel(x.id === sel ? null : x.id)}
+            aria-pressed={x.id === sel}
+            title={x.suburb + " " + signedPct(x.rates_change_pct)}>
+            <span className="p">{signedPct(x.rates_change_pct)}</span>
+            <span className="stem" style={{ height: (28 + Math.abs(x.rates_change_pct) / 13.6 * 104) + "px" }}/>
+            <span className="dot"/>
+            <span className="nm">{x.suburb}</span>
           </button>
         ))}
       </div>
+      <div className="hends"><span>FELL 15%</span><span>ROSE 15%</span></div>
 
-      <Detail h={h} />
-
-      <section className="section">
-        <h2>Three examples that can&rsquo;t be compared</h2>
-        <p className="section-note">
-          These households move house or buy their first home between the two years, so
-          their bill changes for reasons other than the Budget. They are in the source
-          data but excluded from the comparison above.
-        </p>
-        <div className="excl">
-          {excluded.map(x => (
-            <div className="excl-row" key={x.id}>
-              <span className="n">{x.suburb}</span>
-              <span className="r">{x.not_comparable_reason}</span>
+      {h && (
+        <div className="reveal" style={{ marginTop: 44, "--rev": "700ms" }}>
+          <p className="persona">{h.household}</p>
+          <div className="pair" style={{ marginTop: 22 }}>
+            <div className="col">
+              <div className="lab">2025-26</div>
+              <div className="v">{money(rowA[M.rates_column])}</div>
+              <div className="tr">{trace(h.id, "2025-26")}</div>
             </div>
-          ))}
+            <div className="col">
+              <div className="lab">2026-27</div>
+              <div className="v">{money(rowB[M.rates_column])}</div>
+              <div className="tr">{trace(h.id, "2026-27")}</div>
+            </div>
+            <div className="col delta" data-dir={dirOf(h.rates_change)}>
+              <div className="lab">CHANGE</div>
+              <div className="v">{signedMoney(h.rates_change)}</div>
+              <div className="pc">{signedPct(h.rates_change_pct)}</div>
+            </div>
+          </div>
         </div>
-      </section>
+      )}
 
-      <footer className="prov">
-        <h3>Where these numbers come from</h3>
+      <div style={{ marginTop: 44 }}>
+        <button className="btn ghost" onClick={onAgain}>DESCEND AGAIN</button>
+      </div>
+
+      <div className="closing">
+        <h2>Three that were never in the maze</h2>
         <p>
-          Every figure on this page is read from a single column of{" "}
-          {M.source_file}, published with the 2026-27 ACT Budget. Nothing is estimated,
-          modelled or extrapolated. These are {M.household_count} worked examples, not a
-          survey of Canberra, and the suburb names are labels on those examples rather
-          than a guide to what any particular suburb pays. There is no calculator here
-          because the source contains no property values or rating formulas.
+          These households move house or buy their first home between the two years, so
+          their bill changes for reasons other than the Budget. They sit in the source
+          data but cannot be compared, and were kept out of the descent.
         </p>
-        <p>
-          &ldquo;Rates and levies&rdquo; is the source&rsquo;s bundled{" "}
-          {M.rates_column} figure: general rates together with the Police, Fire and
-          Emergency Services Levy, the Safer Families Levy, and a further component the
-          source header abbreviates without defining. It cannot be broken apart, so it is
-          never described here as rates alone.
-        </p>
-        <dl>
-          <dt>Rows checked</dt>
-          <dd>
-            {r.rows_checked} of {r.rows_checked}, against{" "}
-            {r.identity.replace(/_/g, " ")}
-          </dd>
-          <dt>Result</dt>
-          <dd>
-            {r.rows_passed} balanced exactly; {r.rows_failed} did not, beyond a $
-            {r.tolerance_dollars} tolerance
-          </dd>
-          {r.failures.map(f => (
-            <React.Fragment key={f.id + f.year}>
-              <dt>Exception</dt>
-              <dd>
-                {f.suburb}, {f.year}: published {money(f.published)} against{" "}
-                {money(f.calculated)} from its components. Flagged on screen, not
-                corrected.
-              </dd>
-            </React.Fragment>
-          ))}
-        </dl>
-      </footer>
+        {EXCLUDED.map(x => (
+          <div className="exrow" key={x.id}>
+            <span className="n">{x.suburb.toUpperCase()}</span>
+            <span>{x.not_comparable_reason}</span>
+          </div>
+        ))}
+
+        <div className="prov">
+          <h2>Where these numbers come from</h2>
+          <p>
+            Every figure is read from one column of {M.source_file}, published with the
+            2026-27 ACT Budget. Nothing is estimated, modelled or extrapolated. These are{" "}
+            {M.household_count} worked examples, not a survey of Canberra, and the suburb
+            names are labels on those examples rather than a guide to what any particular
+            suburb pays. There is no calculator here because the source contains no
+            property values or rating formulas.
+          </p>
+          <p>
+            &ldquo;Rates and levies&rdquo; is the source&rsquo;s bundled {M.rates_column}{" "}
+            figure: general rates together with the Police, Fire and Emergency Services
+            Levy, the Safer Families Levy, and a further component the source header
+            abbreviates without defining. It cannot be broken apart, so it is never
+            called rates alone.
+          </p>
+          <p>
+            The order of the descent is the size of each household&rsquo;s dollar
+            movement, smallest first. That is a presentation choice and not something the
+            source ranks.
+          </p>
+          <dl>
+            <dt>Rows checked</dt>
+            <dd>{R.rows_checked} of {R.rows_checked}, against {R.identity.replace(/_/g, " ")}</dd>
+            <dt>Result</dt>
+            <dd>{R.rows_passed} balanced exactly; {R.rows_failed} did not, beyond a ${R.tolerance_dollars} tolerance</dd>
+            {R.failures.map(f => (
+              <React.Fragment key={f.id + f.year}>
+                <dt>Exception</dt>
+                <dd>
+                  {f.suburb}, {f.year}: published {money(f.published)} against{" "}
+                  {money(f.calculated)} from its components. Flagged in the descent, not
+                  corrected.
+                </dd>
+              </React.Fragment>
+            ))}
+          </dl>
+        </div>
+      </div>
     </div>
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+function App(){
+  const [phase, setPhase] = useState("open");
+  const [depth, setDepth] = useState(0);
+  const [score, setScore] = useState(0);
+
+  const begin = () => { setDepth(0); setScore(0); setPhase("descent"); };
+  const answer = wasRight => {
+    if (wasRight) setScore(s => s + 1);
+    if (depth === LEVELS.length - 1) setPhase("surface");
+    else setDepth(d => d + 1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  return (
+    <React.Fragment>
+      <Frames depth={phase === "descent" ? depth : phase === "surface" ? 6 : 0}/>
+      <div className="stage">
+        {phase === "open"    && <Opening onBegin={begin}/>}
+        {phase === "descent" && <Level h={LEVELS[depth]} depth={depth} onAnswer={answer}/>}
+        {phase === "surface" && <Surface score={score} onAgain={begin}/>}
+      </div>
+    </React.Fragment>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
 </body>
 </html>
